@@ -18,18 +18,28 @@ var request = require('request'); // "Request" library
 var querystring = require('querystring');
 var cookieParser = require('cookie-parser');
 var md5 = require('MD5');
+var mongoose = require('mongoose');
 
 var client_id = 'd6c0a432650f4184ac886377a5255014';
 var client_secret = 'b7697eb6d6304a17b47302ede0188532';
 
 // may need to modify when not local
 var redirect_uri = 'http://localhost:8080/callback';
-var playlist_select_url = '/select.html';
-var add_user_plylist_pair_url = '/add_account';
-var add_song_url = '/add.html';
 
 // replace with a database
-var temp_dict = {};
+mongoose.connect('mongodb://localhost/spot')
+var db = mongoose.connection;
+db.on('error', console.error.bind(console, 'connection error:'));
+
+var spotSchema = mongoose.Schema({
+    token: { type: String, unique: true, dropDups: true },
+    user: String,
+    playlist: String,
+    access_token: String,
+    refresh_token: String
+});
+var Spot = mongoose.model('Spot', spotSchema);
+//var temp_dict = {};
 
 /**
  * Generates a random string containing numbers and letters
@@ -46,12 +56,18 @@ var generateRandomString = function(length) {
     return text;
 };
 
+var handleError = function(err, res, status) {
+    console.error('fail at: ' + err);
+    res.status(status).end();
+}
+
 var stateKey = 'spotify_auth_state';
 
 var app = express();
 
 app.use(express.static(__dirname + '/public'))
     .use(cookieParser());
+
 
 // login event. User logins in with Spotify credentials and
 //  we redirect to 'redirect_uri' with a code to obtain
@@ -75,6 +91,7 @@ app.get('/login', function(req, res) {
         state: state
     }));
 });
+
 
 // redirect after successful Spotify login
 // if we succeed in getting the access_token, refresh_token,
@@ -123,7 +140,7 @@ app.get('/callback', function(req, res) {
                     }
 
                     // redirect to the playlist selection page
-                    res.redirect(playlist_select_url + '#' +
+                    res.redirect('select.html#' +
                         querystring.stringify({
                         access_token: access_token,
                         refresh_token: refresh_token,
@@ -139,11 +156,12 @@ app.get('/callback', function(req, res) {
     }
 });
 
+
 // add this user-playlist combo to our list of instances
 // we also add the access_token and refresh_token and
 // generate a hash of the user+playlist_uri as a unique
 // url to add songs to this instance
-app.get(add_user_plylist_pair_url, function(req, res) {
+app.get('/add_account', function(req, res) {
     var user = req.query.user || null;
     var playlist = req.query.playlist || null;
     var access_token = req.query.access_token || null;
@@ -158,7 +176,7 @@ app.get(add_user_plylist_pair_url, function(req, res) {
     }
     else {
         // add this pair to the db
-        console.log('adding ' + user + ' with ' + playlist);
+        /*
         var key = md5(user + playlist);
         var value = {
             user: user,
@@ -166,38 +184,53 @@ app.get(add_user_plylist_pair_url, function(req, res) {
             access_token: access_token,
             refresh_token: refresh_token
         }
-        temp_dict[key] = value;
+        */
+        var token = md5(user + playlist);
+            var instance = new Spot({
+                token: token,
+                user: user,
+                playlist: playlist,
+                access_token: access_token,
+                refresh_token: refresh_token
+            });
+            instance.save(function (err, instance) {
+                if (err)
+                    return console.error(err);
+                console.log("added " + instance.user + " with " + instance.playlist);
+            });
+        //temp_dict[key] = value;
         // and let the caller redirect to the unique add song page
-        res.send({ redirect: 'http://localhost:8080' + add_song_url + '#' + key });
+        res.send({ redirect: 'http://localhost:8080/add.html#' + token });
     }
 });
+
 
 // accessable to anyone with the url
 // does a lookup and adds the selected track to
 // the selected playlist based on the provided hash/token
 app.get('/add_track', function(req, res) {
-    var id = req.query.id || null;
+    var track_id = req.query.id || null;
     var token = req.query.token || null;
 
     // validate request
-    if (token === null || id === null) {
-        console.error("fail at add track missing token: " + token + " of track id " + is);
+    if (token === null || track_id === null) {
+        console.error("fail at add track missing token: " + token + " of track id " + track_id);
         res.status(400).end();
     }
     else {
-        // get and validate where we are adding
-        var entry = temp_dict[token];
-        if (entry === null) {
-            console.error("fail at " + token + " is not a valid instance");
-            res.status(400).end();
-        }
-        else {
+        // poll
+        Spot.find({ 'token': token }, function(err, instance) {
+            if (err || instance.length === 0)
+                return handleError(err, res, 400);
+
+            // always the first result (only result)
+            instance = instance[0];
             // attempt to add this song to the instance
             var options = {
-                url: 'https://api.spotify.com/v1/users/' + entry['user'] +
-                   '/playlists/' + entry['playlist'] + '/tracks',
-                headers: { 'Authorization': 'Bearer ' + entry['access_token'] },
-                body: { 'uris': ['spotify:track:' + id] },
+                url: 'https://api.spotify.com/v1/users/' + instance.user +
+                   '/playlists/' + instance.playlist + '/tracks',
+                headers: { 'Authorization': 'Bearer ' + instance.access_token },
+                body: { 'uris': ['spotify:track:' + track_id] },
                 json: true
             };
             request.post(options, function(error, response, body) {
@@ -206,10 +239,10 @@ app.get('/add_track', function(req, res) {
                     console.error(error);
                     res.status(400).end();
                 }
-                console.log("added %s to %s @ %s", id, entry['user'], entry['playlist']);
+                console.log("added %s to %s @ %s", track_id, instance.user, instance.playlist);
                 res.status(200).end();
             });
-        }
+        })
     }
 });
 
