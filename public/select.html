@@ -35,6 +35,7 @@
                     },
                     success: function (response) {
                         // add to the results div object
+                        console.log(response);
                         resultsPlaceholder.innerHTML = template(response);
                     }
                 });
@@ -66,13 +67,18 @@
                 var target = e.target;
                 if (target !== null && target.classList.contains('playlist')) {
                     // make a request to the server and store the information
-                    var id = target.getAttribute('playlist-id');
-                    console.log('sending request to control %s by %s', qs['user'], id);
+                    var playlist_id = target.getAttribute('playlist-id');
+                    // we need the owner (usually the user) in case the
+                    // playlist is collaborative and the user is not the
+                    // creator 
+                    var owner_id = target.getAttribute('owner-id');
+
+                    console.log('sending request to playlist-uri %s owned by %s to be controlled by %s', playlist_id, owner_id, qs['user']);
                     $.ajax({
                         url: 'http://localhost:8080/add_account',
                         data: {
-                            user: qs['user'],
-                            playlist: id,
+                            user: owner_id,
+                            playlist: playlist_id,
                             access_token: qs['access_token'],
                             refresh_token: qs['refresh_token']
                         },
@@ -97,7 +103,7 @@
     <script id="results-template" type="text/x-handlebars-template">
         {{#each items}}
         <p>
-        <button type="button" playlist-id="{{id}}" class="playlist btn btn-group"> 
+        <button type="button" playlist-id="{{id}}" owner-id="{{owner.id}}" class="playlist btn btn-group"> 
             {{name}}
         </button>
         </p>

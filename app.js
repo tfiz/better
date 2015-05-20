@@ -20,11 +20,16 @@ var cookieParser = require('cookie-parser');
 var md5 = require('MD5');
 var mongoose = require('mongoose');
 
-var client_id = 'd6c0a432650f4184ac886377a5255014';
-var client_secret = 'b7697eb6d6304a17b47302ede0188532';
+var client_id = process.env.SPOTIFY_CLIENT_ID;
+var client_secret = process.env.SPOTIFY_SECRET;
+var url_base = process.env.CROWDIFY_URL_BASE;
+
+console.log(client_id);
+console.log(client_secret);
+console.log(url_base);
 
 // may need to modify when not local
-var redirect_uri = 'http://localhost:8080/callback';
+var redirect_uri = url_base + '/callback';
 
 // replace with a database
 mongoose.connect('mongodb://localhost/spot')
@@ -175,32 +180,25 @@ app.get('/add_account', function(req, res) {
         res.status(400).end();
     }
     else {
-        // add this pair to the db
-        /*
-        var key = md5(user + playlist);
-        var value = {
+        var token = md5(user + playlist);
+        var instance = {
+            token: token,
             user: user,
             playlist: playlist,
             access_token: access_token,
             refresh_token: refresh_token
-        }
-        */
-        var token = md5(user + playlist);
-            var instance = new Spot({
-                token: token,
-                user: user,
-                playlist: playlist,
-                access_token: access_token,
-                refresh_token: refresh_token
-            });
-            instance.save(function (err, instance) {
-                if (err)
-                    return console.error(err);
-                console.log("added " + instance.user + " with " + instance.playlist);
-            });
-        //temp_dict[key] = value;
+        };
+        // replace if already there
+        Spot.findOneAndUpdate({ 'token': token }, instance,
+                              { 'upsert': true, 'new': true },
+                              function (err, instance) {
+            if (err) {
+                handleError(err, res, 400);
+            }
+            console.log("added " + instance.user + " with " + instance.playlist);
+        });
         // and let the caller redirect to the unique add song page
-        res.send({ redirect: 'http://localhost:8080/add.html#' + token });
+        res.send({ redirect: url_base + '/add.html#' + token });
     }
 });
 
@@ -239,12 +237,43 @@ app.get('/add_track', function(req, res) {
                     console.error(error);
                     res.status(400).end();
                 }
-                console.log("added %s to %s @ %s", track_id, instance.user, instance.playlist);
-                res.status(200).end();
+                else if (body.error) {
+                    // refresh test
+                    console.log('attempt refresh');
+                    get_refresh_token(res, token, track_id, instance.refresh_token);
+                    handleError(body.error, res, 400);
+                }
+                else {
+                    console.log("added %s to %s @ %s", track_id, instance.user, instance.playlist);
+                    res.status(200).end();
+                }
             });
         })
     }
 });
+
+var get_refresh_token = function(res, token, track_id, refresh_token) {
+    if (refresh_token === null || track_id === null || token === null) {
+        handleError("invalid refresh request", res, 400);
+    }
+    else {
+        var options = {
+            url: 'https://api.spotify.com/api/token',
+            headers: { 'Authorization': 'Basic ' + (new Buffer(client_id + ':' + client_secret).toString('base64')) },
+            form: { grant_type: 'refresh_token', refresh_token: refresh_token },
+            json: true
+        };
+        console.log(options);
+        request.post(options, function(error, response, body) {
+            if (error) {
+                handleError(error, res, 400)
+            }
+            else {
+                console.log(body);
+            }
+        });
+    }
+};
 
 console.log('Listening on 8080');
 app.listen(8080);
