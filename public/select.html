@@ -26,6 +26,7 @@
             var templateSource = document.getElementById('results-template').innerHTML;
             var template = Handlebars.compile(templateSource);
             var resultsPlaceholder = document.getElementById('results');
+            var url_base = 'http://crowdify.duckdns.org';
 
             var searchPlaylists = function () {
                 $.ajax({
@@ -75,7 +76,7 @@
 
                     console.log('sending request to playlist-uri %s owned by %s to be controlled by %s', playlist_id, owner_id, qs['user']);
                     $.ajax({
-                        url: 'http://localhost:8080/add_account',
+                        url: url_base + '/add_account',
                         data: {
                             user: owner_id,
                             playlist: playlist_id,

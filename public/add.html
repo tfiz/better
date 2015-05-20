@@ -28,9 +28,13 @@
             var templateSource = document.getElementById('results-template').innerHTML;
             var template = Handlebars.compile(templateSource);
             var resultsPlaceholder = document.getElementById('results');
+            var url_base = "http://crowdify.duckdns.org";
+
 
             var token = window.location.hash.substring(1);
             console.log("token: " + token);
+
+
 
             if (token === "") {
                 console.error("invalid token");
@@ -38,7 +42,7 @@
 
             var addTrack = function (trkId) {
                 $.ajax({
-                    url: 'http://localhost:8080/add_track',
+                    url: url_base + 'add_track',
                     data: {
                         id: trkId,
                         token: token
