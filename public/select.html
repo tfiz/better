@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>Crowdify - Playlist Select</title>
+    
+    <script type='text/javascript' src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+    
+    <script type='text/javascript' src="http://cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0-alpha.1/handlebars.min.js"></script>
+    
+    <link rel="stylesheet" type="text/css" href="https://developer.spotify.com/web-api/static/css/cached.css">
+    
+    <style type='text/css'>
+        body {
+            padding: 20px;
+        }
+
+        #search-form, .form-control {
+            margin-bottom: 20px;
+        }
+    </style>
+      
+    <script type='text/javascript'>//<![CDATA[ 
+        window.onload=function() {
+            // find template and compile it
+            var templateSource = document.getElementById('results-template').innerHTML;
+            var template = Handlebars.compile(templateSource);
+            var resultsPlaceholder = document.getElementById('results');
+
+            var searchPlaylists = function () {
+                $.ajax({
+                    url: 'https://api.spotify.com/v1/users/' + qs['user'] + '/playlists',
+                    headers: {
+                        Authorization: 'Bearer ' + qs['access_token']
+                    },
+                    success: function (response) {
+                        // add to the results div object
+                        resultsPlaceholder.innerHTML = template(response);
+                    }
+                });
+            };
+
+            // split the query string to a dictionary
+            var qs = (function(a) {
+                // no querysting
+                if (a == "") {
+                    console.error("missing querysting");
+                    return {};
+                }
+
+                pairs = a.split('&');
+                b = {}
+                for (var i = 0; i < pairs.length; i++) {
+                    pair = pairs[i].split('=', 2);
+                    if (pair.length == 1)
+                        b[pair[0]] = "";
+                    else
+                        b[pair[0]] = pair[1];
+                }
+                return b;
+            })(window.location.hash.substring(1));
+
+            searchPlaylists();
+
+            results.addEventListener('click', function (e) {
+                var target = e.target;
+                if (target !== null && target.classList.contains('playlist')) {
+                    // make a request to the server and store the information
+                    var id = target.getAttribute('playlist-id');
+                    console.log('sending request to control %s by %s', qs['user'], id);
+                    $.ajax({
+                        url: 'http://localhost:8080/add_account',
+                        data: {
+                            user: qs['user'],
+                            playlist: id,
+                            access_token: qs['access_token'],
+                            refresh_token: qs['refresh_token']
+                        },
+                        success: function (response) {
+                            console.log(response);
+                            if (response.redirect) {
+                                window.location.href = response.redirect;
+                            }
+                        }
+                    });
+                }
+            });
+        }//]]>  
+    </script>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Pick a Playlist</h1>
+        <div id="results"></div>
+    </div>
+    <script id="results-template" type="text/x-handlebars-template">
+        {{#each items}}
+        <p>
+        <button type="button" playlist-id="{{id}}" class="playlist btn btn-group"> 
+            {{name}}
+        </button>
+        </p>
+        {{/each}}
+    </script>
+</body>
+</html>
