@@ -45,7 +45,14 @@ var spotSchema = mongoose.Schema({
     refresh_token: String
 });
 var Spot = mongoose.model('Spot', spotSchema);
-//var temp_dict = {};
+
+// node ends on ctrl-c
+process.on('SIGINT', function() {
+    db.close(function () {
+        console.log('Mongoose disconnect');
+        process.exit(0);
+    });
+});
 
 /**
  * Generates a random string containing numbers and letters
@@ -91,7 +98,7 @@ app.get('/login', function(req, res) {
     querystring.stringify({
         response_type: 'code',
         client_id: client_id,
-        show_dialog: true,
+        show_dialog: false,
         scope: scope,
         redirect_uri: redirect_uri,
         state: state
