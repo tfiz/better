@@ -234,9 +234,7 @@ app.get('/add_track', function(req, res) {
             };
             request.post(options, function(error, response, body) {
                 if (error) {
-                    console.error("fail at add track, printing error");
-                    console.error(error);
-                    res.status(400).end();
+                    handleError("fail at add track, printing error" + error, res, 400);
                 }
                 else if (body.error) {
                     // refresh test
@@ -246,7 +244,7 @@ app.get('/add_track', function(req, res) {
                 }
                 else {
                     console.log("added %s to %s @ %s", track_id, instance.user, instance.playlist);
-                    res.status(200).end();
+                    res.redirect(url_base);
                 }
             });
         })
