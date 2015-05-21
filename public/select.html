@@ -5,25 +5,14 @@
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
     <script type='text/javascript' src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
-    <script type='text/javascript' src="http://cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0-alpha.1/handlebars.min.js"></script>
+    <script type='text/javascript' src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/3.0.3/handlebars.min.js"></script>
     <link rel="stylesheet" type="text/css" href="https://developer.spotify.com/web-api/static/css/cached.css">
-    
-    <style type='text/css'>
-        body {
-            padding: 20px;
-        }
-        button#select {
-            font-size: 3vw
-        }
-        h1 {
-            font-size: 9vw;
-        }
-    </style>
+    <link rel="stylesheet" type="text/css" href="stylesheets/style.css">
       
     <script type='text/javascript'>//<![CDATA[ 
         window.onload=function() {
             // find template and compile it
-            var templateSource = document.getElementById('results-template').innerHTML;
+            var templateSource = $('#results-template').html();
             var template = Handlebars.compile(templateSource);
             var resultsPlaceholder = document.getElementById('results');
             var url_base = 'http://crowdify.duckdns.org';
@@ -97,14 +86,14 @@
 </head>
 
 <body>
-    <div class="container">
+    <div id="content" class="container">
         <h1 align="center">Pick a Playlist</h1>
         <div id="results"></div>
     </div>
     <script id="results-template" type="text/x-handlebars-template">
         {{#each items}}
         <p align="center">
-            <button id="select" playlist-id="{{id}}" owner-id="{{owner.id}}" class="playlist btn btn-secondary"> 
+            <button playlist-id="{{id}}" owner-id="{{owner.id}}" class="playlist btn btn-secondary btn-playlist"> 
                 {{name}}
             </button>
         </p>

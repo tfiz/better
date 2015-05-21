@@ -1,0 +1,86 @@
+/* Large Devices */
+body {
+    padding: 20px;
+}
+
+figure {
+    width: 40%;
+    margin: 10px auto;
+    border-radius: 60%;
+    overflow: hidden;
+}
+
+[class*="container"] {
+    width: 80%;
+    margin: 10px auto;
+}
+
+[type$="submit"] {
+    width: 25%;
+    font-size: 1.5vw;
+}
+
+input#query {
+    width: 60%;
+}
+
+[class*="btn-playlist"] {
+    width: 50%;
+    font-size: 1.8vw;
+}
+
+[class*="btn-song"] {
+    width: 60%;
+    font-size: 1.5vw;
+}
+
+h1 {
+    font-size: 5vw;
+}
+
+h2 {
+    font-size: 2vw;
+} 
+
+/* Mobile Devices */
+@media only screen and (max-device-width: 480px) {
+    figure {
+        width: 80%;
+        margin: 10px auto;
+        border-radius: 60%;
+        overflow: hidden;
+    }
+
+    [class*="container"] {
+        width: 100%;
+        margin: 10px auto;
+    }
+
+    h1 {
+        font-size: 9vw;
+    }
+
+    h2 {
+        font-size: 4vw;
+    } 
+
+    input#query {
+        font-size: 4vw;
+        width: 18em;
+    }
+
+    [type$="submit"] {
+        font-size: 3vw;
+        width: 15em;
+    }
+
+    [class*="btn-playlist"] {
+        font-size: 3vw;
+        width: 20em;
+    }
+
+    [class*="btn-song"] {
+        font-size: 3vw; 
+        width: 25em;
+    }
+}
