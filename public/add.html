@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
     <script type='text/javascript' src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
     <script type='text/javascript' src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/3.0.3/handlebars.min.js"></script>
-    <!-- <script type='text/javascript' src="javascript/qrcode.min.js"></script> -->
+    <script type='text/javascript' src="javascript/qrcode.min.js"></script>
     <link rel="stylesheet" type="text/css" href="https://developer.spotify.com/web-api/static/css/cached.css">
     <link rel="stylesheet" type="text/css" href="stylesheets/style.css">
     <script type='text/javascript'>//<![CDATA[ 
@@ -14,25 +14,24 @@
             // find template and compile it for search results
             var resultsTemplateSource = $('#results-template').html();
             var resultsTemplate = Handlebars.compile(resultsTemplateSource);
-
             // "    " for page load info
             var entryTemplateSource = $('#entry-template').html();
             var entryTemplate = Handlebars.compile(entryTemplateSource);
-
+            // html element we modify
             var resultsPlaceholder = document.getElementById('results');
             var url_base = "http://crowdify.duckdns.org"
-
             var token = window.location.hash.substring(1);
+            var qrcode = new QRCode("qrcode");
+
             console.log("token: " + token);
 
             if (token === "") {
                 console.error("invalid token");
             }
-
-            <!-- new QRCode(document.getElementById("qrcode"), document.location.href); -->
-            resultsPlaceholder.innerHTML = entryTemplate( {text: "Jus some text"} );
-
-
+            
+            <!-- OCresultsPlaceholder.innerHTML = entryTemplate( {text: "Jus some text"} ); -->
+            qrcode.makeCode(window.location.href);
+            $('fb-share').attr('data-href', window.location.href);
 
             var addTrack = function (track_id) {
                 $.ajax({
@@ -79,6 +78,15 @@
 </head>
 
 <body>
+    <div style="margin: 0 auto; width= 14px;" id="fb-root"></div>
+    <script>(function(d, s, id) {
+        var js, fjs = d.getElementsByTagName(s)[0];
+        if (d.getElementById(id)) return;
+        js = d.createElement(s); js.id = id;
+        js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.3";
+        fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));</script>
+
     <div id="content" class="container">
         <h1 align="center">Add a Track</h1>
         <form align="center" id="search-form">
@@ -90,6 +98,11 @@
             </p>
         </form>
         <div id="results"></div>
+        <div id="qrcode"></div>
+        <center>  
+            <div id="fb-share" style="margin-top: 10px;" class="fb-share-button" data-layout="icon"></div>
+        </center> 
+        <p style="margin-top: 8px;" align="center">share the link, QR code, or on FB to let others add</p>
     </div>
     <script id="results-template" type="text/x-handlebars-template">
         {{#each tracks.items}}
@@ -100,10 +113,10 @@
         </p>
         {{/each}}
     </script>
+
     <script id="entry-template" type="text/x-handlebars-template">
         <div class="container">
             <h2 align="center">{{text}}</h2>
-            <div id="qrcode"></div>
         </div>
     </script>
 </body>

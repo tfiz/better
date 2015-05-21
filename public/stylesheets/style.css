@@ -12,16 +12,25 @@ figure {
 
 [class*="container"] {
     width: 80%;
-    margin: 10px auto;
+    margin: auto;
+    margin-top: 10px;
 }
 
 [type$="submit"] {
     width: 25%;
     font-size: 1.5vw;
+    margin-top: 10px;
 }
 
 input#query {
     width: 60%;
+    margin-top: 10px;
+}
+div#qrcode {
+    width:150px;
+    height:150px;
+    margin:  auto;
+    margin-top: 25px;
 }
 
 [class*="btn-playlist"] {
