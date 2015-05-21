@@ -1,36 +1,64 @@
 <!DOCTYPE html>
 <html>
+<head>
     <title>crowdify - crowd-sourced playlists</title>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
     <link rel="stylesheet" type="text/css" href="https://developer.spotify.com/web-api/static/css/cached.css">
     
     <style type='text/css'>
         body {
             padding: 20px;
         }
-        
         figure {
-            width: 50%;
-            margin: 25px auto;
+            width: 40%;
+            margin: 10px auto;
             border-radius: 60%;
             overflow: hidden;
         }
         div#content {
             width: 80%;
-            margin: 20px auto;
+            margin: 10px auto;
+        }
+        input#login {
+            width: 15em;
         }
         h1 {
-            font-size: 6vw;
+            font-size: 5vw;
         }
         h2 {
-            font-size: 1.9vw;
+            font-size: 2vw;
         } 
         input#login {
-            font-size: 2vw;
-            width: 20em;
+            font-size: 1.5vw;
+            width: 15em;
+        }
+
+        @media only screen and (max-device-width: 480px) {
+            figure {
+                width: 80%;
+                margin: 10px auto;
+                border-radius: 60%;
+                overflow: hidden;
+            }
+            div#content {
+                width: 100%;
+                margin: 10px auto;
+            }
+            h1 {
+                font-size: 9vw;
+            }
+            h2 {
+                font-size: 4vw;
+            } 
+            input#login {
+                font-size: 4vw;
+                width: 15em;
+            }
         }
     </style>
+</head>
+
 <body>
     <div id="content" class="container">
         <h1 align="center">crowdify</h1>
@@ -43,5 +71,4 @@
         </form>
     </div>
 </body>
-
 </html>

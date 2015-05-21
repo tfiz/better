@@ -3,7 +3,7 @@
 <head>
     <title>crowdify - add a track</title>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
     <script type='text/javascript' src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
     <script type='text/javascript' src="http://cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0-alpha.1/handlebars.min.js"></script>
     <link rel="stylesheet" type="text/css" href="https://developer.spotify.com/web-api/static/css/cached.css">
@@ -12,9 +12,24 @@
         body {
             padding: 20px;
         }
-
-        #search-form, .form-control {
-            margin-bottom: 20px;
+        button#add {
+            font-size: 3vw
+        }
+        h1 {
+            font-size: 9vw;
+        }
+        h2 {
+            font-size: 4vw;
+        }
+        input#search {
+            font-size: 4vw;
+            width: 15em;
+        }
+        input#query {
+            font-size: 4vw;
+        }
+        label {
+             padding: 10px;
         }
     </style>
     
@@ -26,11 +41,8 @@
             var resultsPlaceholder = document.getElementById('results');
             var url_base = "http://crowdify.duckdns.org"
 
-
             var token = window.location.hash.substring(1);
             console.log("token: " + token);
-
-
 
             if (token === "") {
                 console.error("invalid token");
@@ -84,19 +96,23 @@
 
 <body>
     <div class="container">
-        <h1>Search for an Track</h1>
-        <form id="search-form">
-            <input type="text" id="query" value="" class="form-control" placeholder="Type a Track Name"/>
-            <input type="submit" id="search" class="btn btn-primary" value="Search" />
+        <h1 align="center">Search for an Track</h1>
+        <form align="center" id="search-form">
+            <p>
+                <input type="text" id="query" value="" class="form-control" placeholder="Type a Track Name"/>
+            </p>
+            <p>
+                <input type="submit" id="search" class="btn btn-primary" value="Search" />
+            </p>
         </form>
         <div id="results"></div>
     </div>
     <script id="results-template" type="text/x-handlebars-template">
         {{#each tracks.items}}
-        <p>
-        <button type="button" data-track-id="{{id}}" class="track btn btn-secondary"> 
-            {{{name}}} : {{#each artists}} {{{name}}} : {{/each}}
-        </button>
+        <p align="center">
+            <button id="add" data-track-id="{{id}}" class="track btn btn-secondary"> 
+                {{{name}}} : {{#each artists}} {{{name}}} : {{/each}}
+            </button>
         </p>
         {{/each}}
     </script>

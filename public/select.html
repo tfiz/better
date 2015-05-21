@@ -3,7 +3,7 @@
 <head>
     <title>crowdify - playlist select</title>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
     <script type='text/javascript' src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
     <script type='text/javascript' src="http://cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0-alpha.1/handlebars.min.js"></script>
     <link rel="stylesheet" type="text/css" href="https://developer.spotify.com/web-api/static/css/cached.css">
@@ -12,9 +12,11 @@
         body {
             padding: 20px;
         }
-
-        #search-form, .form-control {
-            margin-bottom: 20px;
+        button#select {
+            font-size: 3vw
+        }
+        h1 {
+            font-size: 9vw;
         }
     </style>
       
@@ -96,15 +98,15 @@
 
 <body>
     <div class="container">
-        <h1>Pick a Playlist</h1>
+        <h1 align="center">Pick a Playlist</h1>
         <div id="results"></div>
     </div>
     <script id="results-template" type="text/x-handlebars-template">
         {{#each items}}
-        <p>
-        <button type="button" playlist-id="{{id}}" owner-id="{{owner.id}}" class="playlist btn btn-secondary"> 
-            {{name}}
-        </button>
+        <p align="center">
+            <button id="select" playlist-id="{{id}}" owner-id="{{owner.id}}" class="playlist btn btn-secondary"> 
+                {{name}}
+            </button>
         </p>
         {{/each}}
     </script>
