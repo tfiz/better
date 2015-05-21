@@ -1,13 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <title>crowdify - add a track</title>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-    <title>Crowdify - Add a Track</title>
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <script type='text/javascript' src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
-    
     <script type='text/javascript' src="http://cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0-alpha.1/handlebars.min.js"></script>
-    
     <link rel="stylesheet" type="text/css" href="https://developer.spotify.com/web-api/static/css/cached.css">
     
     <style type='text/css'>
@@ -19,9 +17,7 @@
             margin-bottom: 20px;
         }
     </style>
-      
-
-
+    
     <script type='text/javascript'>//<![CDATA[ 
         $( "document" ).ready(function() {
             // find template and compile it
@@ -97,7 +93,7 @@
     <script id="results-template" type="text/x-handlebars-template">
         {{#each tracks.items}}
         <p>
-        <button type="button" data-track-id="{{id}}" class="track btn btn-group"> 
+        <button type="button" data-track-id="{{id}}" class="track btn btn-secondary"> 
             {{{name}}} : {{#each artists}} {{{name}}} : {{/each}}
         </button>
         </p>

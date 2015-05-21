@@ -23,6 +23,7 @@ var mongoose = require('mongoose');
 var client_id = process.env.SPOTIFY_CLIENT_ID;
 var client_secret = process.env.SPOTIFY_SECRET;
 var url_base = process.env.CROWDIFY_URL_BASE;
+var pubilc_dir = process.env.CROWDIFY_PUBLIC_DIR
 
 console.log(client_id);
 console.log(client_secret);
@@ -70,7 +71,7 @@ var stateKey = 'spotify_auth_state';
 
 var app = express();
 
-app.use(express.static(__dirname + '/public'))
+app.use(express.static(__dirname + '/' + pubilc_dir))
     .use(cookieParser());
 
 

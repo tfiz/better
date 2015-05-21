@@ -1,13 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <title>crowdify - playlist select</title>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-    <title>Crowdify - Playlist Select</title>
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <script type='text/javascript' src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
-    
     <script type='text/javascript' src="http://cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0-alpha.1/handlebars.min.js"></script>
-    
     <link rel="stylesheet" type="text/css" href="https://developer.spotify.com/web-api/static/css/cached.css">
     
     <style type='text/css'>
@@ -26,7 +24,7 @@
             var templateSource = document.getElementById('results-template').innerHTML;
             var template = Handlebars.compile(templateSource);
             var resultsPlaceholder = document.getElementById('results');
-            var url_base = 'http://crowdify.duckdns.org';
+            var url_base = 'http://localhost:8080';
 
             var searchPlaylists = function () {
                 $.ajax({
@@ -104,7 +102,7 @@
     <script id="results-template" type="text/x-handlebars-template">
         {{#each items}}
         <p>
-        <button type="button" playlist-id="{{id}}" owner-id="{{owner.id}}" class="playlist btn btn-group"> 
+        <button type="button" playlist-id="{{id}}" owner-id="{{owner.id}}" class="playlist btn btn-secondary"> 
             {{name}}
         </button>
         </p>
