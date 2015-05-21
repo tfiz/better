@@ -9,15 +9,39 @@
         body {
             padding: 20px;
         }
-
-        #search-form, .form-control {
-            margin-bottom: 20px;
+        
+        figure {
+            width: 50%;
+            margin: 25px auto;
+            border-radius: 60%;
+            overflow: hidden;
+        }
+        div#content {
+            width: 80%;
+            margin: 20px auto;
+        }
+        h1 {
+            font-size: 6vw;
+        }
+        h2 {
+            font-size: 1.9vw;
+        } 
+        input#login {
+            font-size: 2vw;
+            width: 20em;
         }
     </style>
 <body>
-    <form action="http://crowdify.duckdns.org/login">
-          <input type="submit" class="btn btn-primary" value="Login">
-    </form>
+    <div id="content" class="container">
+        <h1 align="center">crowdify</h1>
+        <figure>
+            <img align="middle" src="http://i.ytimg.com/vi/Vhf5cuXiLTA/maxresdefault.jpg" class="rounded-corners"> 
+        </figure>
+        <h2 align="center">because everyone hates your music</h2>
+        <form align="center" action="http://crowdify.duckdns.org/login">
+              <input type="submit" id="login" class="btn btn-primary" value="Login">
+        </form>
+    </div>
 </body>
 
 </html>
