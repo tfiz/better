@@ -108,7 +108,7 @@
         {{#each tracks.items}}
         <p align="center">
             <button track-id="{{id}}" class="track btn btn-secondary btn-song">
-                {{{name}}} : {{#each artists}} {{{name}}} : {{/each}}
+                {{{name}}} - {{#each artists}}{{{name}}}{{#unless @last}}, {{/unless}}{{/each}}
             </button>
         </p>
         {{/each}}

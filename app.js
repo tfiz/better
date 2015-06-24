@@ -23,7 +23,7 @@ var mongoose = require('mongoose');
 var client_id = process.env.SPOTIFY_CLIENT_ID;
 var client_secret = process.env.SPOTIFY_SECRET;
 var url_base = process.env.CROWDIFY_URL_BASE;
-var pubilc_dir = process.env.CROWDIFY_PUBLIC_DIR
+var public_dir = process.env.CROWDIFY_PUBLIC_DIR
 
 console.log(client_id);
 console.log(client_secret);
@@ -54,6 +54,8 @@ process.on('SIGINT', function() {
     });
 });
 
+var port = 5555;
+
 /**
  * Generates a random string containing numbers and letters
  * @param  {number} length The length of the string
@@ -78,9 +80,8 @@ var stateKey = 'spotify_auth_state';
 
 var app = express();
 
-app.use(express.static(__dirname + '/' + pubilc_dir))
+app.use(express.static(__dirname + '/' + public_dir))
     .use(cookieParser());
-
 
 // login event. User logins in with Spotify credentials and
 //  we redirect to 'redirect_uri' with a code to obtain
@@ -281,5 +282,5 @@ var get_refresh_token = function(res, token, track_id, refresh_token) {
     }
 };
 
-console.log('Listening on 8080');
-app.listen(8080);
+console.log('Listening on ' + port);
+app.listen(port);
