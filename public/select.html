@@ -12,8 +12,8 @@
     <script type='text/javascript'>//<![CDATA[ 
         window.onload=function() {
             // find template and compile it
-            var templateSource = $('#results-template').html();
-            var template = Handlebars.compile(templateSource);
+            var resultsTemplateSource = $('#results-template').html();
+            var resultsTemplate = Handlebars.compile(resultsTemplateSource);
             var resultsPlaceholder = document.getElementById('results');
             var url_base = 'http://crowdify.duckdns.org';
 
@@ -26,7 +26,7 @@
                     success: function (response) {
                         // add to the results div object
                         console.log(response);
-                        resultsPlaceholder.innerHTML = template(response);
+                        resultsPlaceholder.innerHTML = resultsTemplate(response);
                     }
                 });
             };
@@ -64,6 +64,7 @@
                     var owner_id = target.getAttribute('owner-id');
 
                     console.log('sending request to playlist-uri %s owned by %s to be controlled by %s', playlist_id, owner_id, qs['user']);
+
                     $.ajax({
                         url: url_base + '/add_account',
                         data: {

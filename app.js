@@ -54,7 +54,7 @@ process.on('SIGINT', function() {
     });
 });
 
-var port = 5555;
+var port = 8080;
 
 /**
  * Generates a random string containing numbers and letters
@@ -208,6 +208,34 @@ app.get('/add_account', function(req, res) {
         });
         // and let the caller redirect to the unique add song page
         res.send({ redirect: url_base + '/add.html#' + token });
+    }
+});
+
+
+app.get('/grab_playlist', function(req, res) {
+    var token = req.query.token || null;
+
+    if (token == null) {
+        console.error("fail at grab_playlist, missing token");
+        res.status(400).end();
+    }
+    else {
+        Spot.find({ 'token': token }, function(err, instance) {
+            if (err || instance.length === 0)
+                return handleError(err, res, 400);
+
+            // always the first result (only result)
+            instance = instance[0];
+            var options = {
+                url: 'https://api.spotify.com/v1/users/' + instance.user +
+                   '/playlists/' + instance.playlist + '/tracks',
+                headers: { 'Authorization': 'Bearer ' + instance.access_token }
+            };
+            request.get(options, function(request, response, body) {
+                res.writeHead(200, {"Content-Type": "application/json"});
+                res.end(body);
+            });
+        });
     }
 });
 

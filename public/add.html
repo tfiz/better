@@ -14,11 +14,17 @@
             // find template and compile it for search results
             var resultsTemplateSource = $('#results-template').html();
             var resultsTemplate = Handlebars.compile(resultsTemplateSource);
+            var resultsPlaceholder = document.getElementById('results');
+            // find template and compile it for search results
+            /*
+            var playlistTemplateSource = $('#playlist-template').html();
+            var playlistTemplate = Handlebars.compile(playlistTemplateSource);
+            var playlistPlaceholder = document.getElementById('playlist-content');
+            */
             // "    " for page load info
             var entryTemplateSource = $('#entry-template').html();
             var entryTemplate = Handlebars.compile(entryTemplateSource);
             // html element we modify
-            var resultsPlaceholder = document.getElementById('results');
             var url_base = "http://crowdify.duckdns.org"
             var token = window.location.hash.substring(1);
             var qrcode = new QRCode("qrcode");
@@ -28,7 +34,22 @@
             if (token === "") {
                 console.error("invalid token");
             }
-            
+            /*
+            function update_listed_tracks() {
+                $.ajax({
+                    url: url_base + '/grab_playlist',
+                    data: {
+                        token: token
+                    },
+                    success: function(response) {
+                        console.log(response);
+                        playlistPlaceholder.innerHTML = playlistTemplate(response);
+                    }
+                });
+            }   
+            */
+
+            //update_listed_tracks();
             <!-- OCresultsPlaceholder.innerHTML = entryTemplate( {text: "Jus some text"} ); -->
             qrcode.makeCode(window.location.href);
             $('fb-share').attr('data-href', window.location.href);
@@ -44,6 +65,7 @@
                         console.log("added %s", track_id)
                         resultsPlaceholder.innerHTML = entryTemplate( {text: track_id + " added"} );
                         $('#query').val("");
+                        //update_listed_tracks();
                     }
                 });
             };
@@ -97,6 +119,7 @@
                 <input type="submit" class="btn btn-primary" value="Search" />
             </p>
         </form>
+        <!-- <div id="playlist-content"></div> -->
         <div id="results"></div>
         <div id="qrcode"></div>
         <center>  
@@ -104,6 +127,19 @@
         </center> 
         <p style="margin-top: 8px;" align="center">share the link, QR code, or on FB to let others add</p>
     </div>
+
+    <!---
+    <script id="playlist-template" type="text/x-handlebars-template">
+        {{#each items}}
+        <p align="center">
+            <button track-id="{{track.id}}" track-name="{{track.name}}" class="btn-group-vertical btn-songrank">-</button>
+                {{{track.name}}}
+            <button track-id="{{track.id}}" track-name="{{track.name}}" class="btn-submenu btn-songrank">+</button>
+        </p>
+        {{/each}}
+    </script>
+    -->
+
     <script id="results-template" type="text/x-handlebars-template">
         {{#each tracks.items}}
         <p align="center">
