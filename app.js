@@ -54,7 +54,7 @@ process.on('SIGINT', function() {
     });
 });
 
-var port = 8080;
+var port = 5555;
 
 /**
  * Generates a random string containing numbers and letters
