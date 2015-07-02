@@ -3,12 +3,17 @@
 
 Modified from Spotify’s Accounts Auth Examples and webexample for searching albums
 
-Self hosted on 5555 for now (but through http-proxy so we can host multiple apps on different ports routed by the hostname)
 ```bash
 $ node app.js
 ```
+Connect through http://localhost:5555 
 
-1) http://localhost:8080
+Use a reverse proxy or port forward to listen on port 80.
+nginx works well
+
+http://crowdify.duckdns.org
+
+1) http://localhost:5555
     - click “LOGIN”
 2) Login with spotify creds
 
