@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
     <script type='text/javascript' src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
     <script type='text/javascript' src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/3.0.3/handlebars.min.js"></script>
+    <script type='text/javascript' src="javascript/crwdy.js"></script>
     <link rel="stylesheet" type="text/css" href="https://developer.spotify.com/web-api/static/css/cached.css">
     <link rel="stylesheet" type="text/css" href="stylesheets/style.css">
       
@@ -15,9 +16,8 @@
             var resultsTemplateSource = $('#results-template').html();
             var resultsTemplate = Handlebars.compile(resultsTemplateSource);
             var resultsPlaceholder = document.getElementById('results');
-            var url_base = 'http://crowdify.duckdns.org';
-
-            var searchPlaylists = function () {
+    
+            function searchPlaylists() {
                 $.ajax({
                     url: 'https://api.spotify.com/v1/users/' + qs['user'] + '/playlists',
                     headers: {
@@ -25,31 +25,13 @@
                     },
                     success: function (response) {
                         // add to the results div object
-                        console.log(response);
+                        // console.log(response);
                         resultsPlaceholder.innerHTML = resultsTemplate(response);
                     }
                 });
             };
 
-            // split the query string to a dictionary
-            var qs = (function(a) {
-                // no querysting
-                if (a == "") {
-                    console.error("missing querysting");
-                    return {};
-                }
-
-                pairs = a.split('&');
-                b = {}
-                for (var i = 0; i < pairs.length; i++) {
-                    pair = pairs[i].split('=', 2);
-                    if (pair.length == 1)
-                        b[pair[0]] = "";
-                    else
-                        b[pair[0]] = pair[1];
-                }
-                return b;
-            })(window.location.hash.substring(1));
+            var qs = hashset(window.location.hash.substring(1));
 
             searchPlaylists();
 
@@ -63,10 +45,11 @@
                     // creator 
                     var owner_id = target.getAttribute('owner-id');
 
-                    console.log('sending request to playlist-uri %s owned by %s to be controlled by %s', playlist_id, owner_id, qs['user']);
+                    console.log('sending request to playlist-uri %s owned by %s to be controlled by %s', 
+                                playlist_id, owner_id, qs['user']);
 
                     $.ajax({
-                        url: url_base + '/add_account',
+                        url: '/add_account',
                         data: {
                             user: owner_id,
                             playlist: playlist_id,

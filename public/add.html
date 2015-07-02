@@ -7,8 +7,10 @@
     <script type='text/javascript' src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
     <script type='text/javascript' src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/3.0.3/handlebars.min.js"></script>
     <script type='text/javascript' src="javascript/qrcode.min.js"></script>
+    <script type='text/javascript' src="javascript/crwdy.js"></script>
     <link rel="stylesheet" type="text/css" href="https://developer.spotify.com/web-api/static/css/cached.css">
     <link rel="stylesheet" type="text/css" href="stylesheets/style.css">
+
     <script type='text/javascript'>//<![CDATA[ 
         $( "document" ).ready(function() {
             // find template and compile it for search results
@@ -25,7 +27,6 @@
             var entryTemplateSource = $('#entry-template').html();
             var entryTemplate = Handlebars.compile(entryTemplateSource);
             // html element we modify
-            var url_base = "http://crowdify.duckdns.org"
             var token = window.location.hash.substring(1);
             var qrcode = new QRCode("qrcode");
 
@@ -35,9 +36,9 @@
                 console.error("invalid token");
             }
             /*
-            function update_listed_tracks() {
+           function update_listed_tracks() {
                 $.ajax({
-                    url: url_base + '/grab_playlist',
+                    url: '/grab_playlist',
                     data: {
                         token: token
                     },
@@ -54,9 +55,9 @@
             qrcode.makeCode(window.location.href);
             $('fb-share').attr('data-href', window.location.href);
 
-            var addTrack = function (track_id) {
+            function addTrack(track_id) {
                 $.ajax({
-                    url: url_base + '/add_track',
+                    url: '/add_track',
                     data: {
                         id: track_id,
                         token: token
@@ -70,7 +71,7 @@
                 });
             };
 
-            var searchTracks = function (query) {
+            function searchTracks(query) {
                 $.ajax({
                     url: 'https://api.spotify.com/v1/search',
                     data: {
