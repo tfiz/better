@@ -49,13 +49,16 @@
                                 playlist_id, owner_id, qs['user']);
 
                     $.ajax({
+                        type: 'POST',
                         url: '/add_account',
-                        data: {
+                        data: JSON.stringify({
                             user: owner_id,
                             playlist: playlist_id,
                             access_token: qs['access_token'],
                             refresh_token: qs['refresh_token']
-                        },
+                        }),
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "json",
                         success: function (response) {
                             console.log(response);
                             if (response.redirect) {

@@ -19,11 +19,12 @@ var querystring = require('querystring');
 var cookieParser = require('cookie-parser');
 var md5 = require('MD5');
 var mongoose = require('mongoose');
+var bodyparser = require('body-parser');
 
-var client_id = process.env.SPOTIFY_CLIENT_ID;
-var client_secret = process.env.SPOTIFY_SECRET;
-var url_base = process.env.CROWDIFY_URL_BASE;
-var public_dir = process.env.CROWDIFY_PUBLIC_DIR
+var client_id = process.env.SPOTIFY_CLIENT_ID || null;
+var client_secret = process.env.SPOTIFY_SECRET || null;
+var url_base = process.env.CROWDIFY_URL_BASE || null;
+var public_dir = process.env.CROWDIFY_PUBLIC_DIR || null;
 
 console.log(client_id);
 console.log(client_secret);
@@ -31,20 +32,30 @@ console.log(url_base);
 
 // may need to modify when not local
 var redirect_uri = url_base + '/callback';
-
 // replace with a database
 mongoose.connect('mongodb://localhost/spot')
 var db = mongoose.connection;
-db.on('error', console.error.bind(console, 'connection error:'));
 
+//db.on('error', console.error.bind(console, 'connection error:'));
 var spotSchema = mongoose.Schema({
     token: { type: String, unique: true, dropDups: true },
     user: String,
     playlist: String,
     access_token: String,
-    refresh_token: String
+    refresh_token: String,
+    playlist_contents: {}
 });
+
 var Spot = mongoose.model('Spot', spotSchema);
+var port = 5555;
+var stateKey = 'spotify_auth_state';
+var app = express();
+
+app.use(express.static(__dirname + '/' + public_dir))
+    .use(cookieParser());
+
+// for json objs in POST requests
+app.use(bodyparser.json());
 
 // node ends on ctrl-c
 process.on('SIGINT', function() {
@@ -54,7 +65,6 @@ process.on('SIGINT', function() {
     });
 });
 
-var port = 5555;
 
 /**
  * Generates a random string containing numbers and letters
@@ -76,12 +86,6 @@ var handleError = function(err, res, status) {
     res.status(status).end();
 }
 
-var stateKey = 'spotify_auth_state';
-
-var app = express();
-
-app.use(express.static(__dirname + '/' + public_dir))
-    .use(cookieParser());
 
 // login event. User logins in with Spotify credentials and
 //  we redirect to 'redirect_uri' with a code to obtain
@@ -175,11 +179,12 @@ app.get('/callback', function(req, res) {
 // we also add the access_token and refresh_token and
 // generate a hash of the user+playlist_uri as a unique
 // url to add songs to this instance
-app.get('/add_account', function(req, res) {
-    var user = req.query.user || null;
-    var playlist = req.query.playlist || null;
-    var access_token = req.query.access_token || null;
-    var refresh_token = req.query.refresh_token || null;
+app.post('/add_account', function(req, res) {
+    console.error(req.body);
+    var user = req.body.user || null;
+    var playlist = req.body.playlist || null;
+    var access_token = req.body.access_token || null;
+    var refresh_token = req.body.refresh_token || null;
 
     // validate request
     if (user === null || playlist === null || access_token === null ||
@@ -190,28 +195,47 @@ app.get('/add_account', function(req, res) {
     }
     else {
         var token = md5(user + playlist);
-        var instance = {
-            token: token,
-            user: user,
-            playlist: playlist,
-            access_token: access_token,
-            refresh_token: refresh_token
+        // grab the current contents of this playlist, along with the snapshot id
+        var playlist_contents = {};
+        var options = {
+            url: 'https://api.spotify.com/v1/users/' + user +
+                 '/playlists/' + playlist + '/tracks',
+            headers:{ 'Authorization': 'Bearer ' + access_token }
         };
-        // replace if already there
-        Spot.findOneAndUpdate({ 'token': token }, instance,
-                              { 'upsert': true, 'new': true },
-                              function (err, instance) {
-            if (err) {
-                handleError(err, res, 400);
+        request.get(options, function(error, response, body) {
+            // pull out the track ids of the playlist at this time
+            tracks = JSON.parse(body)['items']
+            if (error)
+                handleError(error, response, 403);
+            for (i in tracks) {
+                playlist_contents[tracks[i]['track']['id']] = 1;
             }
-            console.log("added " + instance.user + " with " + instance.playlist);
+            // add this instance to mongo
+            var instance = {
+                token: token,
+                user: user,
+                playlist: playlist,
+                access_token: access_token,
+                refresh_token: refresh_token,
+                playlist_contents: playlist_contents
+            };
+            // replace if already there
+            Spot.findOneAndUpdate({ 'token': token }, instance,
+                                  { 'upsert': true, 'new': true },
+                                  function (err, instance) {
+                if (err) {
+                    handleError(err, res, 400);
+                }
+                console.log("added " + instance.user + " with " + instance.playlist);
+            });
+
+            // and let the caller redirect to the unique add song page
+            res.status(201).send({ redirect: '/add.html#token=' + token });
         });
-        // and let the caller redirect to the unique add song page
-        res.send({ redirect: url_base + '/add.html#' + token });
     }
 });
 
-
+// gets the contents of this users playlist
 app.get('/grab_playlist', function(req, res) {
     var token = req.query.token || null;
 
@@ -228,10 +252,10 @@ app.get('/grab_playlist', function(req, res) {
             instance = instance[0];
             var options = {
                 url: 'https://api.spotify.com/v1/users/' + instance.user +
-                   '/playlists/' + instance.playlist + '/tracks',
+                     '/playlists/' + instance.playlist + '/tracks',
                 headers: { 'Authorization': 'Bearer ' + instance.access_token }
             };
-            request.get(options, function(request, response, body) {
+            request.get(options, function(error, response, body) {
                 res.writeHead(200, {"Content-Type": "application/json"});
                 res.end(body);
             });
@@ -243,9 +267,9 @@ app.get('/grab_playlist', function(req, res) {
 // accessable to anyone with the url
 // does a lookup and adds the selected track to
 // the selected playlist based on the provided hash/token
-app.get('/add_track', function(req, res) {
-    var track_id = req.query.id || null;
-    var token = req.query.token || null;
+app.post('/add_track', function(req, res) {
+    var track_id = req.body.id || null;
+    var token = req.body.token || null;
 
     // validate request
     if (token === null || track_id === null) {
@@ -256,34 +280,52 @@ app.get('/add_track', function(req, res) {
         // poll
         Spot.find({ 'token': token }, function(err, instance) {
             if (err || instance.length === 0)
-                return handleError(err, res, 400);
+                return handleError(err, res, 403);
 
             // always the first result (only result)
             instance = instance[0];
             // attempt to add this song to the instance
-            var options = {
-                url: 'https://api.spotify.com/v1/users/' + instance.user +
-                   '/playlists/' + instance.playlist + '/tracks',
-                headers: { 'Authorization': 'Bearer ' + instance.access_token },
-                body: { 'uris': ['spotify:track:' + track_id] },
-                json: true
-            };
-            request.post(options, function(error, response, body) {
-                if (error) {
-                    handleError("fail at add track, printing error" + error, res, 400);
-                }
-                else if (body.error) {
-                    // refresh test
-                    console.log('attempt refresh');
-                    get_refresh_token(res, token, track_id, instance.refresh_token);
-                    handleError(body.error, res, 400);
-                }
-                else {
-                    console.log("added %s to %s @ %s", track_id, instance.user, instance.playlist);
-                    res.redirect(url_base);
-                }
-            });
-        })
+            // but first make sure it won't be a duplicate
+            // 202 it's already there (accepted no process)
+            if (track_id in instance.playlist_contents) {
+                console.log("%s is already in the playlist so we'll skip it", track_id);
+                res.status(202).end();
+            }
+            else {
+                var options = {
+                    url: 'https://api.spotify.com/v1/users/' + instance.user +
+                       '/playlists/' + instance.playlist + '/tracks',
+                    headers: { 'Authorization': 'Bearer ' + instance.access_token },
+                    body: { 'uris': ['spotify:track:' + track_id] },
+                    json: true
+                };
+                request.post(options, function(error, response, body) {
+                    if (error) {
+                        handleError("fail at add track, printing error" + error, res, 400);
+                    }
+                    else if (body.error) {
+                        // refresh test
+                        console.log('attempt refresh');
+                        get_refresh_token(res, token, track_id, instance.refresh_token);
+                        handleError(body.error, res, 400);
+                    }
+                    // created 201
+                    else {
+                        console.log("added %s to %s @ %s", track_id, instance.user, instance.playlist);
+                        instance.playlist_contents[track_id] = 1;
+                        var conditions = { token: token };
+                        var update = { playlist_contents: instance.playlist_contents };
+                        var options = {};
+                        Spot.update(conditions, update, options, function(err, raw) {
+                            if (err) {
+                                console.error("problem adding to database, not fatal");
+                            }
+                        })
+                        res.status(201).end();
+                    }
+                });
+            }
+        });
     }
 });
 

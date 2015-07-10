@@ -27,15 +27,17 @@
             var entryTemplateSource = $('#entry-template').html();
             var entryTemplate = Handlebars.compile(entryTemplateSource);
             // html element we modify
-            var token = window.location.hash.substring(1);
             var qrcode = new QRCode("qrcode");
+
+            var qs = hashset(window.location.hash.substring(1));
+            var token = qs['token'];
 
             console.log("token: " + token);
 
             if (token === "") {
                 console.error("invalid token");
             }
-            /*
+            
            function update_listed_tracks() {
                 $.ajax({
                     url: '/grab_playlist',
@@ -44,29 +46,44 @@
                     },
                     success: function(response) {
                         console.log(response);
-                        playlistPlaceholder.innerHTML = playlistTemplate(response);
+                        //playlistPlaceholder.innerHTML = playlistTemplate(response);
                     }
                 });
             }   
-            */
+            update_listed_tracks();
 
-            //update_listed_tracks();
             <!-- OCresultsPlaceholder.innerHTML = entryTemplate( {text: "Jus some text"} ); -->
             qrcode.makeCode(window.location.href);
             $('fb-share').attr('data-href', window.location.href);
 
-            function addTrack(track_id) {
+            function addTrack(track_id, track_name) {
                 $.ajax({
                     url: '/add_track',
-                    data: {
+                    type: 'POST',
+                    data: JSON.stringify({
                         id: track_id,
                         token: token
-                    },
-                    success: function(response) {
-                        console.log("added %s", track_id)
-                        resultsPlaceholder.innerHTML = entryTemplate( {text: track_id + " added"} );
+                    }),
+                    contentType: 'application/json; charset=utf-8',
+                    dataType: 'json',
+                    complete: function(data, status) {
+                        if (data.status == 201) {
+                            console.log("added %s", track_name);
+                            resultsPlaceholder.innerHTML = entryTemplate( 
+                                {text: "oh great! \"" + track_name + "\" was added"} );
+                            //update_listed_tracks();
+                        }
+                        else if (data.status == 202) {
+                            console.log("%s is already there", track_name);
+                            resultsPlaceholder.innerHTML = entryTemplate( 
+                                {text: "lucky you \""  + track_name + "\" was already added"} );
+                            //update_listed_tracks();
+                        }
+                        else {
+                            console.log("couldn't add %s", track_name);
+                            resultsPlaceholder.innerHTML = entryTemplate( {text: "add failed =/"} );
+                        }
                         $('#query').val("");
-                        //update_listed_tracks();
                     }
                 });
             };
@@ -88,7 +105,7 @@
             results.addEventListener("click", function (e) {
                 var target = e.target;
                 if (target !== null && target.classList.contains('track'))
-                    addTrack(target.getAttribute('track-id'));
+                    addTrack(target.getAttribute('track-id'), target.getAttribute('track-name'));
             });
 
             document.getElementById('search-form').addEventListener('submit', function (e) {
@@ -144,7 +161,7 @@
     <script id="results-template" type="text/x-handlebars-template">
         {{#each tracks.items}}
         <p align="center">
-            <button track-id="{{id}}" class="track btn btn-secondary btn-song">
+            <button track-id="{{id}}" track-name="{{name}}" class="track btn btn-secondary btn-song">
                 {{{name}}} - {{#each artists}}{{{name}}}{{#unless @last}}, {{/unless}}{{/each}}
             </button>
         </p>
