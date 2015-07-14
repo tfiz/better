@@ -303,54 +303,88 @@ app.post('/add_track', function(req, res) {
                     if (error) {
                         handleError("fail at add track, printing error" + error, res, 400);
                     }
-                    else if (body.error) {
+
+                    // if we need to get a new access token do it before
+                    // we make the add request
+                    if (body.error) {
                         // refresh test
                         console.log('attempt refresh');
-                        get_refresh_token(res, token, track_id, instance.refresh_token);
-                        handleError(body.error, res, 400);
+                        if (get_refresh_token(token)) {
+                            console.log("failed to refresh");
+                        }
+                        else {
+                            console.log("refresh success!");
+                        }
                     }
+
                     // created 201
-                    else {
-                        console.log("added %s to %s @ %s", track_id, instance.user, instance.playlist);
-                        instance.playlist_contents[track_id] = 1;
-                        var conditions = { token: token };
-                        var update = { playlist_contents: instance.playlist_contents };
-                        var options = {};
-                        Spot.update(conditions, update, options, function(err, raw) {
-                            if (err) {
-                                console.error("problem adding to database, not fatal");
-                            }
-                        })
-                        res.status(201).end();
-                    }
+                    console.log("added %s to %s @ %s", track_id, instance.user, instance.playlist);
+                    instance.playlist_contents[track_id] = 1;
+                    var conditions = { token: token };
+                    var update = { playlist_contents: instance.playlist_contents };
+                    var options = {};
+                    Spot.update(conditions, update, options, function(err, raw) {
+                        if (err) {
+                            console.error("problem adding to database, not fatal");
+                        }
+                    });
+                    res.status(201).end();
+
                 });
             }
         });
     }
 });
 
-var get_refresh_token = function(res, token, track_id, refresh_token) {
-    if (refresh_token === null || track_id === null || token === null) {
-        handleError("invalid refresh request", res, 400);
+var get_refresh_token = function(token) {
+    if (token === null) {
+        console.error("pass a token");
+        return 1;
     }
     else {
-        var options = {
-            url: 'https://api.spotify.com/api/token',
-            headers: { 'Authorization': 'Basic ' + (new Buffer(client_id + ':' + client_secret).toString('base64')) },
-            form: { grant_type: 'refresh_token', refresh_token: refresh_token },
-            json: true
-        };
-        console.log(options);
-        request.post(options, function(error, response, body) {
-            if (error) {
-                handleError(error, res, 400)
+        Spot.find({ 'token': token }, function(err, instance) {
+            if (err || instance.length === 0) {
+                console.error("db prob")
+                return 1;
             }
-            else {
-                console.log(body);
-            }
+
+            // always the first result (only result)
+            instance = instance[0];
+
+            var options = {
+                url: 'https://accounts.spotify.com/api/token',
+                headers: { 'Authorization': 'Basic ' + (new Buffer(client_id + ':' + client_secret).toString('base64')) },
+                form: { grant_type: 'refresh_token', 
+                        refresh_token: instance.refresh_token }
+            };
+            console.log(options);
+            request.post(options, function(error, response, body) {
+                if (error) {
+                    console.error("could't get token from accounts.spotify");
+                    return 1;
+                }
+                else {
+                    console.log("appears we refreshed successfully")
+                    console.log(body);
+                    console.log(body.access_token);
+                    var conditions = { token: token };
+                    var update = { access_token: body.access_token };
+                    var options = {};
+                    Spot.update(conditions, update, options, function(err, raw) {
+                        if (err) {
+                            console.error("problem updating access_token. need to register");
+                            return 1;
+                        }
+                        else {
+                            console.error("success updating access token");
+                            return 0;
+                        }
+                    });
+                }
+            });
         });
     }
-};
+}
 
 console.log('Listening on ' + port);
 app.listen(port);
