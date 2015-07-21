@@ -24,7 +24,12 @@ http://crowdify.duckdns.org
 
 5) share the url, anyone can use it
 
-Known/Possible Issues:
 
-Weird user page after refresh token. probably a return status problem
 
+Known/Possible Issues/Todo:
+
+Only shows 1st possible 20 playlists
+
+- show more when user scrolls down
+
+Add managment page
