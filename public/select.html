@@ -25,8 +25,18 @@
                     },
                     success: function (response) {
                         // add to the results div object
-                        // console.log(response);
-                        resultsPlaceholder.innerHTML = resultsTemplate(response);
+                        //response['caller'] = qs['user'];
+                        //console.log(response);
+                        filtered = [];
+                        for (p in response['items']) {
+                            // not the owner, we can't add
+                            item = response['items'][p];
+                            if (item['owner']['id'] === qs['user']) {
+                                filtered.push(item);
+                            }
+                        }
+                        //console.log(filtered)
+                        resultsPlaceholder.innerHTML = resultsTemplate(filtered);
                     }
                 });
             };
@@ -78,7 +88,7 @@
         <div id="results"></div>
     </div>
     <script id="results-template" type="text/x-handlebars-template">
-        {{#each items}}
+        {{#each this}}
         <p align="center">
             <button playlist-id="{{id}}" owner-id="{{owner.id}}" class="playlist btn btn-secondary btn-playlist"> 
                 {{name}}
