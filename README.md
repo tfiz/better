@@ -24,3 +24,7 @@ http://crowdify.duckdns.org
 
 5) share the url, anyone can use it
 
+Known/Possible Issues:
+
+Weird user page after refresh token. probably a return status problem
+
