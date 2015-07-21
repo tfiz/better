@@ -309,34 +309,47 @@ app.post('/add_track', function(req, res) {
                     if (body.error) {
                         // refresh test
                         console.log('attempt refresh');
-                        if (get_refresh_token(token)) {
-                            console.log("failed to refresh");
+                        if (refresh_access_token(token)) {
+                            handleError("failed to refresh", res, 400);
                         }
                         else {
                             console.log("refresh success!");
+                            options = {
+                                url: '/add_track',
+                                body: { 'track_id': track_id,
+                                        'token': token }
+                            }
+                            // this is returned from a recursive call, we want 201
+                            request.post(options, function(error, response, body) {
+                                    if (err) {
+                                        handleError("fail at update access_token recur call", res, 400);
+                                    }
+                                res.status(201).end();
+                            });
                         }
                     }
-
-                    // created 201
-                    console.log("added %s to %s @ %s", track_id, instance.user, instance.playlist);
-                    instance.playlist_contents[track_id] = 1;
-                    var conditions = { token: token };
-                    var update = { playlist_contents: instance.playlist_contents };
-                    var options = {};
-                    Spot.update(conditions, update, options, function(err, raw) {
-                        if (err) {
-                            console.error("problem adding to database, not fatal");
-                        }
-                    });
-                    res.status(201).end();
-
+                    // access_token is okay
+                    else {
+                        // created 201
+                        console.log("added %s to %s @ %s", track_id, instance.user, instance.playlist);
+                        instance.playlist_contents[track_id] = 1;
+                        var conditions = { token: token };
+                        var update = { playlist_contents: instance.playlist_contents };
+                        var options = {};
+                        Spot.update(conditions, update, options, function(err, raw) {
+                            if (err) {
+                                console.error("problem adding to database, not fatal");
+                            }
+                        });
+                        res.status(201).end();
+                    }
                 });
             }
         });
     }
 });
 
-var get_refresh_token = function(token) {
+function refresh_access_token(token) {
     if (token === null) {
         console.error("pass a token");
         return 1;
@@ -365,10 +378,10 @@ var get_refresh_token = function(token) {
                 }
                 else {
                     console.log("appears we refreshed successfully")
-                    console.log(body);
-                    console.log(body.access_token);
+                    access_token = JSON.parse(body)['access_token']
+                    console.log(access_token);
                     var conditions = { token: token };
-                    var update = { access_token: body.access_token };
+                    var update = { access_token: access_token };
                     var options = {};
                     Spot.update(conditions, update, options, function(err, raw) {
                         if (err) {
