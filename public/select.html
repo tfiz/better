@@ -16,34 +16,61 @@
             var resultsTemplateSource = $('#results-template').html();
             var resultsTemplate = Handlebars.compile(resultsTemplateSource);
             var resultsPlaceholder = document.getElementById('results');
+            var filteredList = [];
+            var nextpage;
+            var height;
+            var exhaust = false;
+            var lock = false;
     
-            function searchPlaylists() {
-                $.ajax({
-                    url: 'https://api.spotify.com/v1/users/' + qs['user'] + '/playlists',
-                    headers: {
-                        Authorization: 'Bearer ' + qs['access_token']
-                    },
-                    success: function (response) {
-                        // add to the results div object
-                        //response['caller'] = qs['user'];
-                        //console.log(response);
-                        filtered = [];
-                        for (p in response['items']) {
-                            // not the owner, we can't add
-                            item = response['items'][p];
-                            if (item['owner']['id'] === qs['user']) {
-                                filtered.push(item);
+            function searchPlaylists(url) {
+                if (!lock) {
+                    lock = true;
+                    url = url || 'https://api.spotify.com/v1/users/' + qs['user'] + '/playlists';
+                    $.ajax({
+                        url: url,
+                        headers: {
+                            Authorization: 'Bearer ' + qs['access_token']
+                        },
+                        success: function (response) {
+                            // add to the results div object
+                            //response['caller'] = qs['user'];
+                            nextpage = response['next'];
+                            //console.log(url);
+                            //console.log(nextpage);
+
+                            if (nextpage === null || nextpage === url) {
+                                exhaust = true;
                             }
+
+                            for (p in response['items']) {
+                                // not the owner, we can't add
+                                item = response['items'][p];
+                                if (item['owner']['id'] === qs['user']) {
+                                    filteredList.push(item);
+                                }
+                            }
+                            height = document.body.scrollHeight;
+                            console.log("new height " + height);
+                            resultsPlaceholder.innerHTML = resultsTemplate(filteredList);
+                            lock = false
                         }
-                        //console.log(filtered)
-                        resultsPlaceholder.innerHTML = resultsTemplate(filtered);
-                    }
-                });
+                    });
+                }
             };
+
 
             var qs = hashset(window.location.hash.substring(1));
 
             searchPlaylists();
+
+            $(window).scroll(function() {
+                //console.log($(window).scrollTop());
+                //if ($(window).scrollTop() > height) {
+                    if (!exhaust) {
+                        searchPlaylists(nextpage);
+                    }
+                //}
+            });
 
             results.addEventListener('click', function (e) {
                 var target = e.target;
