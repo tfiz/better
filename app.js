@@ -47,7 +47,7 @@ var spotSchema = mongoose.Schema({
 });
 
 var Spot = mongoose.model('Spot', spotSchema);
-var port = 5555;
+var port = 5556;
 var stateKey = 'spotify_auth_state';
 var app = express();
 

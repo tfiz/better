@@ -17,12 +17,13 @@
             var resultsTemplateSource = $('#results-template').html();
             var resultsTemplate = Handlebars.compile(resultsTemplateSource);
             var resultsPlaceholder = document.getElementById('results');
-            // find template and compile it for search results
-            /*
+           
+            // this is for showing the current playlist contents on the add page.
+            // up-vote support
             var playlistTemplateSource = $('#playlist-template').html();
             var playlistTemplate = Handlebars.compile(playlistTemplateSource);
             var playlistPlaceholder = document.getElementById('playlist-content');
-            */
+            
             // "    " for page load info
             var entryTemplateSource = $('#entry-template').html();
             var entryTemplate = Handlebars.compile(entryTemplateSource);
@@ -46,7 +47,7 @@
                     },
                     success: function(response) {
                         console.log(response);
-                        //playlistPlaceholder.innerHTML = playlistTemplate(response);
+                        playlistPlaceholder.innerHTML = playlistTemplate(response);
                     }
                 });
             }   
