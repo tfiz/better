@@ -21,10 +21,10 @@ var md5 = require('MD5');
 var mongoose = require('mongoose');
 var bodyparser = require('body-parser');
 
-var client_id = process.env.SPOTIFY_CLIENT_ID || null;
-var client_secret = process.env.SPOTIFY_SECRET || null;
-var url_base = process.env.CROWDIFY_URL_BASE || null;
-var public_dir = process.env.CROWDIFY_PUBLIC_DIR || null;
+var client_id = 'd6c0a432650f4184ac886377a5255014'; //process.env.SPOTIFY_CLIENT_ID || null;
+var client_secret ='b7697eb6d6304a17b47302ede0188532'; //process.env.SPOTIFY_SECRET || null;
+var url_base = 'http://crowdify.duckdns.org'; //process.env.CROWDIFY_URL_BASE || null;
+var public_dir = 'public'; //process.env.CROWDIFY_PUBLIC_DIR || null;
 
 console.log(client_id);
 console.log(client_secret);

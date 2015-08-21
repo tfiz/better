@@ -3,33 +3,30 @@
 
 Modified from Spotify’s Accounts Auth Examples and webexample for searching albums
 
+Use 'forever' for better management
 ```bash
-$ node app.js
+~ sudo npm install -g forever
+~ forever start app.js
 ```
-Connect through http://localhost:5555 
-
 Use a reverse proxy or port forward to listen on port 80.
-nginx works well
+ -nginx works well
 
-http://crowdify.duckdns.org
+Since we use forever we hardcode all envs into the node application
 
-1) http://localhost:5555
-    - click “LOGIN”
+
+1) http://crowdify.duckdns.org
+
 2) Login with spotify creds
 
 3) Select a playlist 
-    - (just first 20 for now)
+    - you must own the playlist i.e. is cannot be a colab playlist someone else
+    created
     
 4) Search and select a song (only first 20 results)
+    - is this an issue?
 
 5) share the url, anyone can use it
 
 
-
 Known/Possible Issues/Todo:
-
-Only shows 1st possible 20 playlists
-
-- show more when user scrolls down
-
-Add managment page
+ -Add managment page
