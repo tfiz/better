@@ -13,14 +13,16 @@
  * https://developer.spotify.com/web-api/authorization-guide/#authorization_code_flow
  */
 
-var express = require('express'); // Express web server framework
-var request = require('request'); // "Request" library
+var express = require('express');
+var request = require('request');
 var querystring = require('querystring');
 var cookieParser = require('cookie-parser');
 var md5 = require('MD5');
 var mongoose = require('mongoose');
 var bodyparser = require('body-parser');
 
+// expect a module with these four entries
+// to setup env
 var conf = require('./localconf');
 client_id = conf.client_id;
 client_secret = conf.client_secret;
