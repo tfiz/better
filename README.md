@@ -1,4 +1,4 @@
-# crowdify
+# better
 # Modified from Spotify Accounts Authentication Examples
 
 Modified from Spotify’s Accounts Auth Examples and webexample for searching albums
@@ -11,21 +11,15 @@ Use 'forever' for better management
 Use a reverse proxy or port forward to listen on port 80.
  -nginx works well
 
-Since we use forever we hardcode all envs into the node application
+1) Login with spotify creds
 
-
-1) http://crowdify.duckdns.org
-
-2) Login with spotify creds
-
-3) Select a playlist 
+2) Select a playlist !
     - you must own the playlist i.e. is cannot be a colab playlist someone else
     created
     
-4) Search and select a song (only first 20 results)
-    - is this an issue?
+3) Search for a song!
 
-5) share the url, anyone can use it
+4) Share! Anyone can add
 
 
 Known/Possible Issues/Todo:
