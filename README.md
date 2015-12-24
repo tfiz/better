@@ -6,6 +6,7 @@ Modified from Spotify’s Accounts Auth Examples and webexample for searching al
 Use 'forever' for better management
 ```bash
 ~ sudo npm install -g forever
+~ npm install
 ~ forever start app.js
 ```
 Use a reverse proxy or port forward to listen on port 80.
